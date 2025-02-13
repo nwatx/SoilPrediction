@@ -30,7 +30,14 @@ class SoilXGBoostExperiment:
 
         lagged_y = []
         for shift in range(self.config.context_length):
-            lagged_y.append(self.df[self.config.y_cols].shift(shift + 1).rename(lambda x : f'{x}_{shift + 1}').reset_index(drop=True))
+            # Shift the DataFrame by (shift+1) and rename its columns using the current shift value.
+            lagged_df = self.df[self.config.y_cols].shift(shift + 1)
+            lagged_df = lagged_df.rename(columns=lambda x, s=shift: f'{x}_{s + 1}')
+            lagged_df = lagged_df.reset_index(drop=True)
+            lagged_y.append(lagged_df)
+        # lagged_y = []
+        # for shift in range(self.config.context_length):
+        #     lagged_y.append(self.df[self.config.y_cols].shift(shift + 1).rename(lambda x : f'{x}_{shift + 1}', axis=1).reset_index(drop=True))
 
         to_concat = [self.df, *lagged_y]
         X = pd.concat(to_concat, axis=1)
